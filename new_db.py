@@ -145,7 +145,7 @@ for j, city in enumerate(cities):
     f_lang, f_frame = city.trend()
     tmp = []
     for f in f_frame:
-        if f[0] not in language:
+        if f[0] not in languages:
             tmp += [f]
 
     favorite_languages = []
