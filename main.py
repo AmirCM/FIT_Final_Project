@@ -61,3 +61,4 @@ plt.ylabel('Number of jobs')
 fig.autofmt_xdate()
 plt.title('This chart illustrate the number of job request per city')
 plt.show()
+
