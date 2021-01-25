@@ -13,7 +13,7 @@ frame_lan = {'python': ['flask', 'django', 'cherrypy', 'falcon'],
              'c++': ['cpp'],
              'sql': ['sqlserver', 'sqlite']}
 languages = [lan for lan in frame_lan]
-languages += ['java', 'swift']
+languages += ['java', 'swift', 'c']
 
 def check_stem(words: list):
     i_words = set()
