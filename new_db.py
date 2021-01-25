@@ -150,7 +150,7 @@ for j, city in enumerate(cities):
 
     favorite_languages = []
     for f in f_lang:
-        if f in languages:
+        if f[0] in languages:
             favorite_languages += [f]
 
     draw(favorite_languages, tmp, city.name)
