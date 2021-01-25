@@ -5,13 +5,14 @@ import nltk
 import re
 
 frame_lan = {'python': ['flask', 'django', 'cherrypy', 'falcon'],
-             'javascript': ['angular', 'jquery', 'java-script', 'vue', 'react'],
+             'javascript': ['angular', 'jquery', 'vue', 'react'],
              'html': ['bootstrap', 'html5', 'foundation', 'skeleton'],
              'css': ['bootstrap', 'html5', 'foundation', 'skeleton'],
              'php': ['laravel', 'cakephp', 'symphony', 'zend'],
              'c#': ['asp', '.net', 'asp.net', 'c-#', '#c'],
              'c++': ['cpp'],
-             'sql': ['sqlserver', 'sqlite']}
+             'sql': ['sqlserver', 'sqlite'],
+             'java': ['java']}
 
 
 def check_stem(words: list):
@@ -35,14 +36,18 @@ def check_stem(words: list):
 
 def find_common(entries):
     all_words = []
+    frame_works = []
     for text in entries:
         if isinstance(text, str):
             key_w = [word.lower() for word in text.split(' ') if
                      re.match(r'^[a-zA-Z+#]+[a-zA-Z0-9-_+@#%&*|]+$|^c$', word)]
-            all_words += check_stem(key_w)
+            frame_works += key_w
+            key_w = check_stem(key_w)
+            all_words += key_w
 
     all_words = nltk.FreqDist(all_words)
-    return all_words.most_common()
+    frame_works = nltk.FreqDist(frame_works)
+    return all_words.most_common(), frame_works.most_common()
 
 
 class City:
@@ -69,9 +74,6 @@ cities = []
 for c in name_of_cities:
     cities.append(City(df[df['city'] == c], c))
 
-fig = plt.figure()
-labels = []
-popularity = []
 programming_language = {}
 
 """
@@ -103,23 +105,50 @@ with open('keys.txt', 'w') as f:
     print(languages)
 
 """
-for j, city in enumerate(cities):
 
-    print(city.name)
+
+def draw(x, y, title):
+    fig = plt.figure()
     labels = []
     popularity = []
-    for i, w in enumerate(city.trend()):
-        if city.number_of_advertise * 0.05 > w[1] and city.number_of_advertise != 1:
+    for i, w in enumerate(x):
+        if i > 10:
             break
         labels += [w[0]]
         popularity += [w[1]]
 
-    if j % 2 == 0 and j != 0:
-        fig = plt.figure()
-    axs = fig.add_subplot(int(f'21{j % 2 + 1}'))
-    axs.set_title(f'Trends in {city.name}')
+    y_pos = np.arange(len(labels))
+    axs = fig.add_subplot(211)
+    axs.barh(y_pos, popularity, align='center', alpha=0.5)
+    plt.yticks(y_pos, labels)
+    plt.xlabel('Usage')
+    axs.set_title(f'Favorite Languages in {title}')
+
+    labels = []
+    popularity = []
+    for i, w in enumerate(y):
+        if i > 10:
+            break
+        labels += [w[0]]
+        popularity += [w[1]]
+
+    axs = fig.add_subplot(212)
+    axs.set_title(f'Favorite knowledge in {title}')
     axs.bar(labels, popularity)
     plt.setp(axs.get_xticklabels(), rotation=30, horizontalalignment='right')
+
+
+for j, city in enumerate(cities):
+    if j == 1:
+        break
+    print(city.name)
+    f_lang, f_frame = city.trend()
+    tmp = []
+    for f in f_frame:
+        if f[0] not in frame_lan:
+            tmp += [f]
+
+    draw(f_lang, tmp, city.name)
 
 plt.show()
 
