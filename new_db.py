@@ -11,9 +11,9 @@ frame_lan = {'python': ['flask', 'django', 'cherrypy', 'falcon'],
              'php': ['laravel', 'cakephp', 'symphony', 'zend'],
              'c#': ['asp', '.net', 'asp.net', 'c-#', '#c'],
              'c++': ['cpp'],
-             'sql': ['sqlserver', 'sqlite'],
-             'java': ['java']}
-
+             'sql': ['sqlserver', 'sqlite']}
+languages = [lan for lan in frame_lan]
+languages += ['java', 'swift']
 
 def check_stem(words: list):
     i_words = set()
@@ -145,10 +145,15 @@ for j, city in enumerate(cities):
     f_lang, f_frame = city.trend()
     tmp = []
     for f in f_frame:
-        if f[0] not in frame_lan:
+        if f[0] not in language:
             tmp += [f]
 
-    draw(f_lang, tmp, city.name)
+    favorite_languages = []
+    for f in f_lang:
+        if f in languages:
+            favorite_languages += [f]
+
+    draw(favorite_languages, tmp, city.name)
 
 plt.show()
 
