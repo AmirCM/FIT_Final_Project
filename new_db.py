@@ -12,8 +12,10 @@ frame_lan = {'python': ['flask', 'django', 'cherrypy', 'falcon'],
              'c#': ['asp', '.net', 'asp.net', 'c-#', '#c'],
              'c++': ['cpp'],
              'sql': ['sqlserver', 'sqlite']}
+
 languages = [lan for lan in frame_lan]
 languages += ['java', 'swift', 'c']
+
 
 def check_stem(words: list):
     i_words = set()
@@ -50,63 +52,6 @@ def find_common(entries):
     return all_words.most_common(), frame_works.most_common()
 
 
-class City:
-    def __init__(self, df: pd.DataFrame, name):
-        self.df = df
-        self.name = name
-        self.number_of_advertise = self.df.shape[0]
-
-    def trend(self):
-        entries = self.df['key words'].values.tolist()
-        # print(entries)
-        return find_common(entries)
-
-
-df = pd.read_excel('datasets/dataset.xlsx', engine='openpyxl')
-df = df.loc[:, :'kyw']
-df.rename(columns={'g': 'name', 'a Type': 'type', 'a Time': 'date', 'j Tiltle': 'job title', 'rmtWrk': 'remote',
-                   'kyw': 'key words'}, inplace=True)
-
-name_of_cities = [city for i, city in enumerate(df['city'].unique()) if city is not np.nan]
-
-cities = []
-
-for c in name_of_cities:
-    cities.append(City(df[df['city'] == c], c))
-
-programming_language = {}
-
-"""
-with open('keys.txt', 'w') as f:
-    for i, t in enumerate(cities[0].trend()):
-        try:
-            f.write(f'{t}\n')
-            lang = ''
-            for k, v in frame_lan.items():
-                for frame_work in v:
-                    if frame_work in t[0]:
-                        lang = k
-                        break
-            if lang:
-                if lang in languages:
-                    languages[lang] += t[1]
-                else:
-                    languages[lang] = t[1]
-            else:
-                if languages[k]:
-                    languages[k] += t[1]
-                else:
-                    languages[k] = t[1]
-
-        except:
-            print(f'{t[0]}: {t[1]}')
-
-    languages = sorted(languages.items(), key=lambda x: x[1], reverse=True)
-    print(languages)
-
-"""
-
-
 def draw(x, y, title):
     fig = plt.figure()
     labels = []
@@ -114,12 +59,13 @@ def draw(x, y, title):
     for i, w in enumerate(x):
         if i > 10:
             break
-        labels += [w[0]]
+        labels += [w[0] + f': {w[1]}']
         popularity += [w[1]]
 
-    y_pos = np.arange(len(labels))
+    y_pos = np.arange(len(labels), 0, -1)
     axs = fig.add_subplot(211)
-    axs.barh(y_pos, popularity, align='center', alpha=0.5)
+    axs.barh(y_pos, popularity, align='center', alpha=0.5, color='#1FFF00')
+    axs.grid(color='k', ls='-.', lw=0.25)
     plt.yticks(y_pos, labels)
     plt.xlabel('Usage')
     axs.set_title(f'Favorite Languages in {title}')
@@ -138,11 +84,50 @@ def draw(x, y, title):
     plt.setp(axs.get_xticklabels(), rotation=30, horizontalalignment='right')
 
 
-for j, city in enumerate(cities):
-    if j == 1:
-        break
-    print(city.name)
-    f_lang, f_frame = city.trend()
+class City:
+    def __init__(self, df: pd.DataFrame, name):
+        self.df = df
+        self.name = name
+        self.number_of_advertise = self.df.shape[0]
+
+    def trend(self):
+        entries = self.df['key words'].values.tolist()
+        # print(entries)
+        return find_common(entries)
+
+
+def city_analyze(df: pd.DataFrame):
+    name_of_cities = [city for i, city in enumerate(df['city'].unique()) if city is not np.nan]
+
+    cities = []
+
+    for c in name_of_cities:
+        cities.append(City(df[df['city'] == c], c))
+
+    programming_language = {}
+
+    for j, city in enumerate(cities):
+        if j < 25:
+            continue
+        print(city.name)
+        f_lang, f_frame = city.trend()
+        tmp = []
+        for f in f_frame:
+            if f[0] not in languages:
+                tmp += [f]
+
+        favorite_languages = []
+        for f in f_lang:
+            if f[0] in languages:
+                favorite_languages += [f]
+
+        draw(favorite_languages, tmp, city.name)
+        plt.show()
+
+
+def country_analyze(df: pd.DataFrame):
+    iran = City(df, 'Iran')
+    f_lang, f_frame = iran.trend()
     tmp = []
     for f in f_frame:
         if f[0] not in languages:
@@ -153,12 +138,21 @@ for j, city in enumerate(cities):
         if f[0] in languages:
             favorite_languages += [f]
 
-    draw(favorite_languages, tmp, city.name)
+    draw(favorite_languages, tmp, iran.name)
+    plt.show()
 
-plt.show()
+
+df = pd.read_excel('datasets/dataset.xlsx', engine='openpyxl')
+df = df.loc[:, :'kyw']
+df.rename(columns={'g': 'name', 'a Type': 'type', 'a Time': 'date', 'j Tiltle': 'job title', 'rmtWrk': 'remote',
+                   'kyw': 'key words'}, inplace=True)
+
+country_analyze(df)
+city_analyze(df)
 
 """ads = [city.number_of_advertise for city in cities]
 fig, ax = plt.subplots()
+ax.grid(True)
 ax.bar(name_of_cities, ads, color='g')
 xlocs, xlabs = plt.xticks()
 for i, v in enumerate(ads):
@@ -168,4 +162,18 @@ plt.xlabel(f'Cities: {len(cities)}')
 plt.ylabel('Number of jobs')
 fig.autofmt_xdate()
 plt.title('This chart illustrate the number of job request per city')
+plt.show()"""
+
+"""import numpy as np
+
+j_title = df['job title'].values.tolist()
+x = []
+y = []
+for title in df['job title'].unique():
+    if title is not np.nan:
+        # print(f'{type(title)}: {title}: {j_title.count(title)}')
+        x += [title]
+        y += [j_title.count(title)]
+plt.bar(x, y, width=30)
+plt.title('Job Title')
 plt.show()"""
