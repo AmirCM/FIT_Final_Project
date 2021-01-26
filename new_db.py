@@ -103,8 +103,6 @@ def city_analyze(df: pd.DataFrame):
         cities.append(Data(df[df['city'] == c], c))
 
     for j, city in enumerate(cities):
-        if j < 25:
-            continue
         print(city.name)
         f_lang, f_frame = city.trend()
         tmp = []
@@ -117,7 +115,7 @@ def city_analyze(df: pd.DataFrame):
             if f[0] in languages:
                 favorite_languages += [f]
 
-        draw(favorite_languages, tmp, city.name)
+        draw(favorite_languages[:15], tmp[:15], city.name)
         plt.show()
 
 
@@ -175,21 +173,68 @@ def type_analyze(df: pd.DataFrame):
     plt.show()
 
 
-data_f = pd.read_excel('datasets/dataset.xlsx', engine='openpyxl')
-data_f = data_f.loc[:, :'kyw']
-data_f.rename(columns={'g': 'name', 'a type': 'type', 'a time': 'date', 'j title': 'job title', 'rmtWrk': 'remote',
-                   'kyw': 'key words'}, inplace=True)
+def count_result(ser: pd.Series):
+    return ser.unique(), ser.value_counts()
 
-# country_analyze(data_f)
-# city_analyze(data_f)
-# global_job_situation(data_f)
-type_analyze(data_f)
 
-"""for title in data_f['job title'].unique():
-    if title is not np.nan:
-        print(f'{type(title)}: {title}: {j_title.count(title)}')
-        x += [title]
-        y += [j_title.count(title)]
-plt.bar(x, y, width=30)
-plt.title('Job Title')
-plt.show()"""
+def split_lf(df: pd.DataFrame):
+    lang, knw = Data(df, 'DF').trend()
+    knw = [k for k in knw[:50] if k[0] not in languages]
+    lang = [l for l in lang[:50] if l[0] in languages]
+    return lang, knw
+
+
+def remote_analyze(df: pd.DataFrame):
+    u, statistical = count_result(df['remote'].dropna())
+    print(u)
+    no_remote = statistical['no'] + statistical['n'] + statistical[' no'] + statistical['no ']
+    yes_remote = statistical['yes']
+
+    lang, knw = split_lf(df[df['remote'] == 'yes'])
+    draw(lang[:20], knw[:10], ' Remote Work')
+    plt.show()
+
+    lang, knw = split_lf(df[df['remote'] != 'yes'])
+    draw(lang[:20], knw[:10], ' Remote Work')
+    plt.show()
+
+    plt.pie([yes_remote, no_remote],
+            labels=['Yes', 'No'],
+            autopct='%1.1f%%')
+    plt.title('Remote base results')
+    plt.show()
+
+
+def knw_analyze(df: pd.DataFrame):
+    u, statistical = count_result(df['knw'].dropna())
+    print(u)
+    no_ = statistical['no'] + statistical['no ']
+    yes_ = statistical['yes']
+
+    lang, knw = split_lf(df[df['knw'] == 'yes'])
+    draw(lang[:20], knw[:10], 'Knowledge base firms')
+    plt.show()
+
+    lang, knw = split_lf(df[df['knw'] != 'yes'])
+    draw(lang[:20], knw[:10], 'Normal firms')
+    plt.show()
+
+    plt.pie([yes_, no_],
+            labels=['Yes', 'No'],
+            autopct='%1.1f%%')
+    plt.title('Knowledge base company results')
+    plt.show()
+
+
+if __name__ == '__main__':
+    data_f = pd.read_excel('datasets/dataset.xlsx', engine='openpyxl')
+    data_f = data_f.loc[:, :'kyw']
+    data_f.rename(columns={'g': 'name', 'a type': 'type', 'a time': 'date', 'j title': 'job title', 'rmtwrk': 'remote',
+                           'kyw': 'key words'}, inplace=True)
+
+    # country_analyze(data_f)
+    # city_analyze(data_f)
+    # global_job_situation(data_f)
+    # type_analyze(data_f)
+    # remote_analyze(data_f)
+    knw_analyze(data_f)
