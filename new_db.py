@@ -7,7 +7,7 @@ import re
 frame_lan = {'python': ['flask', 'django', 'cherrypy', 'falcon'],
              'javascript': ['angular', 'jquery', 'vue', 'react'],
              'html': ['bootstrap', 'html5', 'foundation', 'skeleton'],
-             'css': ['bootstrap', 'html5', 'foundation', 'skeleton'],
+             'css': ['bootstrap', 'html5', 'css3', 'foundation', 'skeleton'],
              'php': ['laravel', 'cakephp', 'symphony', 'zend'],
              'c#': ['asp', '.net', 'asp.net', 'c-#', '#c'],
              'c++': ['cpp'],
@@ -82,7 +82,7 @@ def draw(x, y, title):
     plt.setp(axs.get_xticklabels(), rotation=30, horizontalalignment='right')
 
 
-class City:
+class Data:
     def __init__(self, df: pd.DataFrame, name):
         self.df = df
         self.name = name
@@ -100,9 +100,7 @@ def city_analyze(df: pd.DataFrame):
     cities = []
 
     for c in name_of_cities:
-        cities.append(City(df[df['city'] == c], c))
-
-    programming_language = {}
+        cities.append(Data(df[df['city'] == c], c))
 
     for j, city in enumerate(cities):
         if j < 25:
@@ -124,7 +122,7 @@ def city_analyze(df: pd.DataFrame):
 
 
 def country_analyze(df: pd.DataFrame):
-    iran = City(df, 'Iran')
+    iran = Data(df, 'Iran')
     f_lang, f_frame = iran.trend()
     tmp = []
     for f in f_frame:
@@ -141,7 +139,7 @@ def country_analyze(df: pd.DataFrame):
 
 
 def global_job_situation(df: pd.DataFrame):
-    j_title = [j for j in data_f['job title'].values.tolist() if j
+    j_title = [j for j in df['job title'].values.tolist() if j
                is not np.nan]
 
     x = []
@@ -152,15 +150,40 @@ def global_job_situation(df: pd.DataFrame):
     plt.show()
 
 
+def type_analyze(df: pd.DataFrame):
+    pr_df = df[df['type'] == 'pr']
+    gov_df = df[df['type'] == 'gov']
+    print(f'Number of Private company: {pr_df.shape[0]}')
+    print(f'Number of Government company: {gov_df.shape[0]}')
+    slices = [gov_df.shape[0], pr_df.shape[0]]
+    activities = ['Government', 'Private']
+    cols = ['#fdf344', '#8126ca']
+
+    plt.pie(slices,
+            labels=activities,
+            colors=cols,
+            startangle=90,
+            autopct='%1.1f%%')
+
+    plt.title('Type Graph')
+
+    lan, knw = Data(pr_df, 'Private Company').trend()
+    knw = [k for k in knw[:50] if k[0] not in languages]
+    lan = [l for l in lan[:50] if l[0] in languages]
+
+    draw(lan, knw[:20], 'Private Company')
+    plt.show()
+
+
 data_f = pd.read_excel('datasets/dataset.xlsx', engine='openpyxl')
 data_f = data_f.loc[:, :'kyw']
-data_f.rename(columns={'g': 'name', 'a Type': 'type', 'a Time': 'date', 'j title': 'job title', 'rmtWrk': 'remote',
-                       'kyw': 'key words'}, inplace=True)
+data_f.rename(columns={'g': 'name', 'a type': 'type', 'a time': 'date', 'j title': 'job title', 'rmtWrk': 'remote',
+                   'kyw': 'key words'}, inplace=True)
 
 # country_analyze(data_f)
 # city_analyze(data_f)
-global_job_situation(data_f)
-
+# global_job_situation(data_f)
+type_analyze(data_f)
 
 """for title in data_f['job title'].unique():
     if title is not np.nan:
