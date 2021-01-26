@@ -57,7 +57,7 @@ def draw(x, y, title):
     labels = []
     popularity = []
     for i, w in enumerate(x):
-        if i > 10:
+        if i > 20:
             break
         labels += [w[0] + f': {w[1]}']
         popularity += [w[1]]
@@ -73,8 +73,6 @@ def draw(x, y, title):
     labels = []
     popularity = []
     for i, w in enumerate(y):
-        if i > 10:
-            break
         labels += [w[0]]
         popularity += [w[1]]
 
@@ -142,36 +140,31 @@ def country_analyze(df: pd.DataFrame):
     plt.show()
 
 
-df = pd.read_excel('datasets/dataset.xlsx', engine='openpyxl')
-df = df.loc[:, :'kyw']
-df.rename(columns={'g': 'name', 'a Type': 'type', 'a Time': 'date', 'j Tiltle': 'job title', 'rmtWrk': 'remote',
-                   'kyw': 'key words'}, inplace=True)
+def global_job_situation(df: pd.DataFrame):
+    j_title = [j for j in data_f['job title'].values.tolist() if j
+               is not np.nan]
 
-country_analyze(df)
-city_analyze(df)
+    x = []
+    y = []
+    j_title = nltk.FreqDist(j_title)
 
-"""ads = [city.number_of_advertise for city in cities]
-fig, ax = plt.subplots()
-ax.grid(True)
-ax.bar(name_of_cities, ads, color='g')
-xlocs, xlabs = plt.xticks()
-for i, v in enumerate(ads):
-    plt.text(xlocs[i] - 0.25, v + 10, str(v))
+    draw(j_title.most_common(), j_title.most_common(15), 'Job Titles')
+    plt.show()
 
-plt.xlabel(f'Cities: {len(cities)}')
-plt.ylabel('Number of jobs')
-fig.autofmt_xdate()
-plt.title('This chart illustrate the number of job request per city')
-plt.show()"""
 
-"""import numpy as np
+data_f = pd.read_excel('datasets/dataset.xlsx', engine='openpyxl')
+data_f = data_f.loc[:, :'kyw']
+data_f.rename(columns={'g': 'name', 'a Type': 'type', 'a Time': 'date', 'j title': 'job title', 'rmtWrk': 'remote',
+                       'kyw': 'key words'}, inplace=True)
 
-j_title = df['job title'].values.tolist()
-x = []
-y = []
-for title in df['job title'].unique():
+# country_analyze(data_f)
+# city_analyze(data_f)
+global_job_situation(data_f)
+
+
+"""for title in data_f['job title'].unique():
     if title is not np.nan:
-        # print(f'{type(title)}: {title}: {j_title.count(title)}')
+        print(f'{type(title)}: {title}: {j_title.count(title)}')
         x += [title]
         y += [j_title.count(title)]
 plt.bar(x, y, width=30)
