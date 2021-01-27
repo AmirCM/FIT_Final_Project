@@ -190,13 +190,15 @@ def remote_analyze(df: pd.DataFrame):
     no_remote = statistical['no'] + statistical['n'] + statistical[' no'] + statistical['no ']
     yes_remote = statistical['yes']
 
-    lang, knw = split_lng_framework(df[df['remote'] == 'yes'])
-    draw(lang[:20], knw[:10], ' Remote Work')
-    plt.show()
+    sub_df = {
+        'Remote Work': df[df['remote'] == 'yes'],
+        'Not available Remote Work': df[df['remote'] != 'yes']}
+    print(sub_df['Not available Remote Work']['remote'].value_counts())
 
-    lang, knw = split_lng_framework(df[df['remote'] != 'yes'])
-    draw(lang[:20], knw[:10], ' Remote Work')
-    plt.show()
+    for sdf in sub_df:
+        lang, knw = split_lng_framework(sub_df[sdf])
+        draw(lang[:20], knw[:10], sdf)
+        plt.show()
 
     plt.pie([yes_remote, no_remote],
             labels=['Yes', 'No'],
@@ -261,4 +263,4 @@ if __name__ == '__main__':
     # type_analyze(data_f)
     # remote_analyze(data_f)
     # knw_analyze(data_f)
-    gender_analyze(data_f)
+    # gender_analyze(data_f)
