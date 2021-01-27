@@ -52,6 +52,17 @@ def find_common(entries):
     return all_words.most_common(), frame_works.most_common()
 
 
+def count_result(ser: pd.Series):
+    return ser.unique(), ser.value_counts()
+
+
+def split_lng_framework(df: pd.DataFrame):
+    lang, knw = Data(df, 'DF').trend()
+    knw = [k for k in knw[:50] if k[0] not in languages]
+    lang = [l for l in lang[:50] if l[0] in languages]
+    return lang, knw
+
+
 def draw(x, y, title):
     fig = plt.figure()
     labels = []
@@ -80,6 +91,13 @@ def draw(x, y, title):
     axs.set_title(f'Favorite knowledge in {title}')
     axs.bar(labels, popularity)
     plt.setp(axs.get_xticklabels(), rotation=30, horizontalalignment='right')
+
+
+def my_plot(df_list):
+    for sdf in df_list:
+        lang, knw = split_lng_framework(df_list[sdf])
+        draw(lang[:20], knw[:10], sdf)
+        plt.show()
 
 
 class Data:
@@ -149,11 +167,15 @@ def global_job_situation(df: pd.DataFrame):
 
 
 def type_analyze(df: pd.DataFrame):
-    pr_df = df[df['type'] == 'pr']
-    gov_df = df[df['type'] == 'gov']
-    print(f'Number of Private company: {pr_df.shape[0]}')
-    print(f'Number of Government company: {gov_df.shape[0]}')
-    slices = [gov_df.shape[0], pr_df.shape[0]]
+    sub_df = {
+        'Private Company': df[df['type'] == 'pr'],
+        'Governmental Company': df[df['type'] == 'gov']}
+
+    my_plot(sub_df)
+
+    slices = [sub_df['Governmental Company'].shape[0], sub_df['Private Company'].shape[0]]
+    print(f'Number of Private company: {slices[0]}')
+    print(f'Number of Government company: {slices[1]}')
     activities = ['Government', 'Private']
     cols = ['#fdf344', '#8126ca']
 
@@ -164,24 +186,7 @@ def type_analyze(df: pd.DataFrame):
             autopct='%1.1f%%')
 
     plt.title('Type Graph')
-
-    lan, knw = Data(pr_df, 'Private Company').trend()
-    knw = [k for k in knw[:50] if k[0] not in languages]
-    lan = [l for l in lan[:50] if l[0] in languages]
-
-    draw(lan, knw[:20], 'Private Company')
     plt.show()
-
-
-def count_result(ser: pd.Series):
-    return ser.unique(), ser.value_counts()
-
-
-def split_lng_framework(df: pd.DataFrame):
-    lang, knw = Data(df, 'DF').trend()
-    knw = [k for k in knw[:50] if k[0] not in languages]
-    lang = [l for l in lang[:50] if l[0] in languages]
-    return lang, knw
 
 
 def remote_analyze(df: pd.DataFrame):
@@ -193,12 +198,8 @@ def remote_analyze(df: pd.DataFrame):
     sub_df = {
         'Remote Work': df[df['remote'] == 'yes'],
         'Not available Remote Work': df[df['remote'] != 'yes']}
-    print(sub_df['Not available Remote Work']['remote'].value_counts())
 
-    for sdf in sub_df:
-        lang, knw = split_lng_framework(sub_df[sdf])
-        draw(lang[:20], knw[:10], sdf)
-        plt.show()
+    my_plot(sub_df)
 
     plt.pie([yes_remote, no_remote],
             labels=['Yes', 'No'],
@@ -213,13 +214,10 @@ def knw_analyze(df: pd.DataFrame):
     no_ = statistical['no'] + statistical['no ']
     yes_ = statistical['yes']
 
-    lang, knw = split_lng_framework(df[df['knw'] == 'yes'])
-    draw(lang[:20], knw[:10], 'Knowledge base firms')
-    plt.show()
-
-    lang, knw = split_lng_framework(df[df['knw'] != 'yes'])
-    draw(lang[:20], knw[:10], 'Normal firms')
-    plt.show()
+    sub_df = {
+        'Knowledge base firms': df[df['knw'] == 'yes'],
+        'Normal firms': df[df['knw'] != 'yes']}
+    my_plot(sub_df)
 
     plt.pie([yes_, no_],
             labels=['Yes', 'No'],
@@ -245,10 +243,7 @@ def gender_analyze(df: pd.DataFrame):
         'Male': df[(df['gender'] == 'male') | (df['gender'] == 'male ')],
         'Female': df[df['gender'] == 'female'],
         'Both Gender': df[df['gender'] == 'both']}
-    for sdf in sub_df:
-        lang, knw = split_lng_framework(sub_df[sdf])
-        draw(lang[:20], knw[:10], sdf)
-        plt.show()
+    my_plot(sub_df)
 
 
 if __name__ == '__main__':
