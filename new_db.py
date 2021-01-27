@@ -246,6 +246,25 @@ def gender_analyze(df: pd.DataFrame):
     my_plot(sub_df)
 
 
+def state_analyze(df: pd.DataFrame):
+    u, statistical = count_result(df['ftime'].dropna())
+    print(u)
+    no_ = statistical['no']
+    yes_ = statistical['yes'] + statistical['yes ']
+    both_ = statistical['both']
+    plt.pie([yes_, no_, both_],
+            labels=['Full', 'Half', 'Both'],
+            autopct='%1.1f%%')
+    plt.title('Full/Half time results')
+    plt.show()
+
+    sub_df = {
+        'Full Time': df[(df['ftime'] == 'yes') | (df['ftime'] == 'yes ')],
+        'Part Time': df[df['ftime'] == 'no'],
+        'Full/Part Time': df[df['ftime'] == 'both']}
+    my_plot(sub_df)
+
+
 if __name__ == '__main__':
     data_f = pd.read_excel('datasets/dataset.xlsx', engine='openpyxl')
     data_f = data_f.loc[:, :'kyw']
@@ -253,9 +272,10 @@ if __name__ == '__main__':
                            'kyw': 'key words'}, inplace=True)
 
     # country_analyze(data_f)
-    # city_analyze(data_f)
+    city_analyze(data_f)
     # global_job_situation(data_f)
     # type_analyze(data_f)
     # remote_analyze(data_f)
     # knw_analyze(data_f)
     # gender_analyze(data_f)
+    # state_analyze(data_f)
