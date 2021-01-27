@@ -177,7 +177,7 @@ def count_result(ser: pd.Series):
     return ser.unique(), ser.value_counts()
 
 
-def split_lf(df: pd.DataFrame):
+def split_lng_framework(df: pd.DataFrame):
     lang, knw = Data(df, 'DF').trend()
     knw = [k for k in knw[:50] if k[0] not in languages]
     lang = [l for l in lang[:50] if l[0] in languages]
@@ -190,11 +190,11 @@ def remote_analyze(df: pd.DataFrame):
     no_remote = statistical['no'] + statistical['n'] + statistical[' no'] + statistical['no ']
     yes_remote = statistical['yes']
 
-    lang, knw = split_lf(df[df['remote'] == 'yes'])
+    lang, knw = split_lng_framework(df[df['remote'] == 'yes'])
     draw(lang[:20], knw[:10], ' Remote Work')
     plt.show()
 
-    lang, knw = split_lf(df[df['remote'] != 'yes'])
+    lang, knw = split_lng_framework(df[df['remote'] != 'yes'])
     draw(lang[:20], knw[:10], ' Remote Work')
     plt.show()
 
@@ -211,11 +211,11 @@ def knw_analyze(df: pd.DataFrame):
     no_ = statistical['no'] + statistical['no ']
     yes_ = statistical['yes']
 
-    lang, knw = split_lf(df[df['knw'] == 'yes'])
+    lang, knw = split_lng_framework(df[df['knw'] == 'yes'])
     draw(lang[:20], knw[:10], 'Knowledge base firms')
     plt.show()
 
-    lang, knw = split_lf(df[df['knw'] != 'yes'])
+    lang, knw = split_lng_framework(df[df['knw'] != 'yes'])
     draw(lang[:20], knw[:10], 'Normal firms')
     plt.show()
 
@@ -224,6 +224,29 @@ def knw_analyze(df: pd.DataFrame):
             autopct='%1.1f%%')
     plt.title('Knowledge base company results')
     plt.show()
+
+
+def gender_analyze(df: pd.DataFrame):
+    u, statistical = count_result(df['gender'].dropna())
+    print(statistical)
+    print('Undefined items is: yes, no !!!')
+    male_ = statistical['male'] + statistical['male ']
+    female_ = statistical['female']
+    both_ = statistical['both']
+    plt.pie([male_, female_, both_],
+            labels=['Male', 'Female', 'Both'],
+            autopct='%1.1f%%')
+    plt.title('Male/Female prefrences results')
+    plt.show()
+
+    sub_df = {
+        'Male': df[(df['gender'] == 'male') | (df['gender'] == 'male ')],
+        'Female': df[df['gender'] == 'female'],
+        'Both Gender': df[df['gender'] == 'both']}
+    for sdf in sub_df:
+        lang, knw = split_lng_framework(sub_df[sdf])
+        draw(lang[:20], knw[:10], sdf)
+        plt.show()
 
 
 if __name__ == '__main__':
@@ -237,4 +260,5 @@ if __name__ == '__main__':
     # global_job_situation(data_f)
     # type_analyze(data_f)
     # remote_analyze(data_f)
-    knw_analyze(data_f)
+    # knw_analyze(data_f)
+    gender_analyze(data_f)
